@@ -17,35 +17,56 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
 
-      - name: Validate dashboard files
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Validate project files
         run: |
-          test -f index.html
-          test -f jobs.json
+          test -s package.json
+          test -s package-lock.json
+          test -s vite.config.js
+          test -s src/App.jsx
+          test -s public/jobs.json
 
-          python -m json.tool jobs.json > /dev/null
+          python -m json.tool public/jobs.json > /dev/null
 
-          echo "Dashboard files validated successfully."
+          echo "Dashboard project files validated."
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build dashboard
+        run: npm run build
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload static dashboard
+      - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: dist
 
+  deploy:
+    needs: build
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
