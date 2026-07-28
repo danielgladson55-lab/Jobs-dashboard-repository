@@ -1,1 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="description"
+    content="Technology Risk, IT Audit and Cybersecurity GRC job intelligence dashboard"
+  >
+
+  <title>Daniel's Job Intelligence Dashboard</title>
+
+  <style>
+    :root {
+      --background: #07111f;
+      --panel: #0d1b2b;
+      --panel-light: #102338;
+      --border: #20384c;
+      --text: #ecf5fa;
+      --muted: #91a7b8;
+      --cyan: #56dbff;
+      --green: #43e3b5;
+      --violet: #a68bfa;
+      --amber: #f4c76b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(
+          circle at 85% 0,
+          rgba(86, 219, 255, 0.12),
+          transparent 28%
+        ),
+        var(--background);
+
+      color: var(--text);
+
+      font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .wrapper {
+      width: min(1180px, calc(100% - 32px));
+      margin: auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+
+      background: rgba(7, 17, 31, 0.93);
+      backdrop-filter: blur(14px);
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .navigation {
+      min-height: 68px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      font-weight: 850;
+    }
+
+    .brand small {
+      display: block;
+
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 14px;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--cyan),
+          var(--green)
+        );
+
+      color: #06131d;
+      font-weight: 950;
+    }
+
+    .synchronization {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .button {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+
+      border-radius: 11px;
+      padding: 10px 14px;
+
+      font-weight: 750;
+      cursor: pointer;
+      text-decoration: none;
+
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .button:hover {
+      border-color: var(--cyan);
+    }
+
+    .button-primary {
+      border: 0;
+
+      color: #06131d;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--cyan),
+          var(--green)
+        );
+    }
+
+    .hero {
+      margin-top: 28px;
+      padding: 36px;
+
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+
+      border: 1px solid var(--border);
+      border-radius: 30px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #101f31,
+          #0b2d39
+        );
+    }
+
+    .eyebrow,
+    .section-label {
+      color: var(--green);
+
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .hero h1 {
+      margin: 16px 0;
+
+      max-width: 760px;
+
+      font-size: clamp(33px, 5.5vw, 62px);
+      line-height: 1;
+    }
+
+    .hero p {
+      max-width: 710px;
+      color: #bdd0db;
+    }
+
+    .notice {
+      margin-top: 20px;
+      padding: 12px 15px;
+
+      border: 1px solid rgba(244, 199, 107, 0.25);
+      border-radius: 12px;
+
+      background: rgba(244, 199, 107, 0.08);
+      color: #f5d999;
+
+      font-size: 13px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .metric,
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      background: rgba(12, 27, 43, 0.9);
+    }
+
+    .metric {
+      padding: 20px;
+    }
+
+    .metric strong {
+      display: block;
+
+      color: var(--cyan);
+      font-size: 30px;
+    }
+
+    section {
+      margin: 40px 0;
+    }
+
+    .section-heading {
+      margin-bottom: 15px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+
+      gap: 18px;
+    }
+
+    .section-heading h2 {
+      margin: 5px 0;
+      font-size: 24px;
+    }
+
+    .section-heading p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .accounts {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .account {
+      position: relative;
+      overflow: hidden;
+
+      padding: 20px;
+      text-decoration: none;
+    }
+
+    .account::before {
+      content: "";
+
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+
+      height: 4px;
+
+      background:
+        linear-gradient(
+          90deg,
+          var(--cyan),
+          var(--violet)
+        );
+    }
+
+    .account b {
+      display: block;
+      margin-top: 18px;
+    }
+
+    .account span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .location-lanes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .lane {
+      padding: 20px;
+
+      text-align: left;
+      color: var(--text);
+
+      cursor: pointer;
+    }
+
+    .lane:hover,
+    .lane.active {
 
