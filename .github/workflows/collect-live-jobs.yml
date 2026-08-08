@@ -16,6 +16,7 @@ jobs:
   collect-publish:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
       - name: Check out Job Tracker
         uses: actions/checkout@v5
@@ -27,9 +28,11 @@ jobs:
 
       - name: Install existing tracker dependencies
         run: |
-          if [ -s requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -s requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
 
-       - name: Validate required Python files
+      - name: Validate required Python files
         run: |
           python -m py_compile src/build_dashboard_feed.py
 
@@ -39,21 +42,14 @@ jobs:
 
           if [ -f src/collect_workday_portals.py ]; then
             python -m py_compile src/collect_workday_portals.py
-          fi do
-            if [ -f "$f" ]; then
-              python -m py_compile "$f"
-              echo "compiled: $f"
-            else
-              echo "::warning::skipping missing file $f"
-            fi
-          done
+          fi
 
-      - name: Collect official company portal jobs (Greenhouse / Lever)
-        if: ${{ hashFiles('config/company-portals.json') != '' }}
+      - name: Collect official company portal jobs
+        if: ${{ hashFiles('config/company-portals.json') != '' && hashFiles('src/collect_company_portals.py') != '' }}
         run: python src/collect_company_portals.py
 
       - name: Collect Workday portal jobs
-        if: ${{ hashFiles('config/workday-portals.json') != '' }}
+        if: ${{ hashFiles('config/workday-portals.json') != '' && hashFiles('src/collect_workday_portals.py') != '' }}
         run: python src/collect_workday_portals.py
 
       - name: Build sanitized dashboard feed
@@ -63,7 +59,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/jobs.csv data/portal-job-history.json dashboard-feed/jobs.json
+
+          git add data/ dashboard-feed/
+
           if git diff --cached --quiet; then
             echo "No tracker changes to commit."
           else
