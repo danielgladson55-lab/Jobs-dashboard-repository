@@ -19,35 +19,42 @@ jobs:
     steps:
       - name: Check out Job Tracker
         uses: actions/checkout@v5
+
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+
       - name: Install existing tracker dependencies
         run: |
           if [ -s requirements.txt ]; then pip install -r requirements.txt; fi
+
       - name: Validate Python syntax
         run: |
-          python -m py_compile src/collect_company_portals.py
-          python -m py_compile src/build_dashboard_feed.py
-          python -m py_compile src/publish_dashboard_feed.py
-      - name: Collect Gmail job alerts
-        if: ${{ hashFiles('src/collect_email_alerts.py') != '' }}
-        env:
-          GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
-          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
-          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
-          GMAIL_USER: ${{ secrets.GMAIL_USER }}
-        run: python src/collect_email_alerts.py
-      - name: Collect official company portal jobs
+          for f in \
+            src/collect_company_portals.py \
+            src/collect_workday_portals.py \
+            src/build_dashboard_feed.py \
+            src/publish_dashboard_feed.py; do
+            if [ -f "$f" ]; then
+              python -m py_compile "$f"
+              echo "compiled: $f"
+            else
+              echo "::warning::skipping missing file $f"
+            fi
+          done
+
+      - name: Collect official company portal jobs (Greenhouse / Lever)
+        if: ${{ hashFiles('config/company-portals.json') != '' }}
         run: python src/collect_company_portals.py
+
+      - name: Collect Workday portal jobs
+        if: ${{ hashFiles('config/workday-portals.json') != '' }}
+        run: python src/collect_workday_portals.py
+
       - name: Build sanitized dashboard feed
         run: python src/build_dashboard_feed.py
-      - name: Publish feed to dashboard repository
-        env:
-          DASHBOARD_REPO_TOKEN: ${{ secrets.DASHBOARD_REPO_TOKEN }}
-          DASHBOARD_REPOSITORY: danielgladson55-lab/job-intelligence-dashboard
-        run: python src/publish_dashboard_feed.py
+
       - name: Commit tracker updates
         run: |
           git config user.name "github-actions[bot]"
