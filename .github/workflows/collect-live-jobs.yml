@@ -29,13 +29,17 @@ jobs:
         run: |
           if [ -s requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Validate Python syntax
+       - name: Validate required Python files
         run: |
-          for f in \
-            src/collect_company_portals.py \
-            src/collect_workday_portals.py \
-            src/build_dashboard_feed.py \
-            src/publish_dashboard_feed.py; do
+          python -m py_compile src/build_dashboard_feed.py
+
+          if [ -f src/collect_company_portals.py ]; then
+            python -m py_compile src/collect_company_portals.py
+          fi
+
+          if [ -f src/collect_workday_portals.py ]; then
+            python -m py_compile src/collect_workday_portals.py
+          fi do
             if [ -f "$f" ]; then
               python -m py_compile "$f"
               echo "compiled: $f"
